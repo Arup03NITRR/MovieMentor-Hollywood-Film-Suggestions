@@ -226,7 +226,7 @@ if selected_movie:
             <div class="movie-card">
                 <h4 class="movie-title" style="color:#5793CD;">{filtered_recommended_movies[i]['title']} ({filtered_recommended_movies[i]['year']})</h4>
                 <p class="movie-details"><strong>Genres:</strong> {', '.join(filtered_recommended_movies[i]['genres'])}</p>
-                <p class="movie-details"><strong>Director:</strong> {recommended_movies[0]['director'][0] if len(recommended_movies[0]['director']) != 0 else "Not Available"}</p>
+                <p class="movie-details"><strong>Director:</strong> {recommended_movies[i]['director'][0] if len(recommended_movies[i]['director']) != 0 else "Not Available"}</p>
                 <p class="similarity {card_class}">Similarity: {percentage:.2f}%</p>
             </div>
             """
