@@ -200,7 +200,8 @@ if selected_movie:
         st.markdown(f"**Title:** {recommended_movies[0]['title']}")
         st.markdown(f"**Release Year:** {recommended_movies[0]['year']}")
         st.markdown(f"**Genres:** {', '.join(recommended_movies[0]['genres'])}")
-        st.markdown(f"**Director:** {recommended_movies[0]['director'][0]}")
+        director = recommended_movies[0]['director'][0] if len(recommended_movies[0]['director']) != 0 else "Not Available"
+        st.markdown(f"**Director:** {director}")
 
         st.markdown("<hr>", unsafe_allow_html=True)
         st.markdown(
@@ -225,7 +226,7 @@ if selected_movie:
             <div class="movie-card">
                 <h4 class="movie-title" style="color:#5793CD;">{filtered_recommended_movies[i]['title']} ({filtered_recommended_movies[i]['year']})</h4>
                 <p class="movie-details"><strong>Genres:</strong> {', '.join(filtered_recommended_movies[i]['genres'])}</p>
-                <p class="movie-details"><strong>Director:</strong> {filtered_recommended_movies[i]['director'][0]}</p>
+                <p class="movie-details"><strong>Director:</strong> {recommended_movies[0]['director'][0] if len(recommended_movies[0]['director']) != 0 else "Not Available"}</p>
                 <p class="similarity {card_class}">Similarity: {percentage:.2f}%</p>
             </div>
             """
