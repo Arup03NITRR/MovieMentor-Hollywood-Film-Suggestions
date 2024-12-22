@@ -28,7 +28,7 @@ def recommend(movie):
         recommend_movie_dict['title'] = movies.iloc[i[0]].title
         recommend_movie_dict['year'] = movies.iloc[i[0]].year
         recommend_movie_dict['genres'] = movies.iloc[i[0]].genres
-        recommend_movie_dict['director'] = movies.iloc[i[0]].director[0]
+        recommend_movie_dict['director'] = movies.iloc[i[0]].director
         recommend_movie_dict['percentage'] = i[1] * 100
         recommended_movies_list.append(recommend_movie_dict)
     
@@ -165,7 +165,7 @@ if selected_movie:
         st.markdown(f"**Title:** {recommended_movies[0]['title']}")
         st.markdown(f"**Release Year:** {recommended_movies[0]['year']}")
         st.markdown(f"**Genres:** {', '.join(recommended_movies[0]['genres'])}")
-        st.markdown(f"**Director:** {recommended_movies[0]['director']}")
+        st.markdown(f"**Director:** {recommended_movies[0]['director'][0]}")
         st.markdown(f"**Similarity:** {recommended_movies[0]['percentage']:.2f}%")
 
         st.markdown("<hr>", unsafe_allow_html=True)
@@ -180,7 +180,7 @@ if selected_movie:
             <div class="movie-card">
                 <h4 class="movie-title">{recommended_movies[i]['title']} ({recommended_movies[i]['year']})</h4>
                 <p class="movie-details"><strong>Genres:</strong> {', '.join(recommended_movies[i]['genres'])}</p>
-                <p class="movie-details"><strong>Director:</strong> {recommended_movies[i]['director']}</p>
+                <p class="movie-details"><strong>Director:</strong> {recommended_movies[i]['director'][0]}</p>
                 <p class="similarity {card_class}">Similarity: {percentage:.2f}%</p>
             </div>
             """
