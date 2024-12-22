@@ -4,7 +4,7 @@
 
 Welcome to the **MovieMentor: Hollywood Film Suggestions**! This project aims to provide personalized movie suggestions based on user preferences, using `content-based filtering` to create an intelligent system capable of recommending movies that users will enjoy.
 
-Explore the **MovieMentor: Hollywood Film Suggestions** and receive tailored movie suggestions. [Click here to try the project](https://example.com).
+Explore the **MovieMentor: Hollywood Film Suggestions** and receive tailored movie suggestions. [Click here to try the project](https://moviementor-hollywood-film-suggestions.streamlit.app/).
 
 
 ## 🚀 Features
@@ -22,10 +22,6 @@ Explore the **MovieMentor: Hollywood Film Suggestions** and receive tailored mov
 - **Pandas & NumPy**: For efficient data handling and manipulation.
 - **Scikit-learn**: Used for building machine learning models and evaluation.
 
-
-## 🚀 Try the Project Now!
-
-Explore the **Movie Recommendation System** and receive tailored movie suggestions. [Click here to try the project](https://moviementor-hollywood-film-suggestions.streamlit.app/).
 
 
 To be continued....
