@@ -35,7 +35,7 @@ def recommend(movie):
     return recommended_movies_list
 
 # Streamlit title and layout
-st.set_page_config(page_title="Movie Recommendations", layout="wide")
+st.set_page_config(page_title="MovieMentor", layout="wide")
 
 # Apply dark theme and custom colors
 st.markdown("""
@@ -111,12 +111,13 @@ st.markdown("""
 st.markdown("""
 <br>
 <div style="text-align: center; color: #ffffff; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1e1e1e; border-radius: 10px;">
+    <h2 style="font-size: 2em; color: #e2d12a;">MovieMentor</h2>
     <h2 style="font-size: 2em; color: #6200ea;">🎬 Welcome to Your Movie Guide! 🎬</h2>
     <p style="font-size: 1.1em;">
         Select a movie and let our <strong style="color: #ff9800;">AI system</strong> recommend films you'll love.
     </p>
     <p style="font-size: 1.2em; color: #37d67a; font-weight: bold;">
-        Your next favorite movie awaits! 🌟
+       🌟 Your next favorite movie awaits! 🌟
     </p>
 </div>
 """, unsafe_allow_html=True)
