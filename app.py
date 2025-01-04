@@ -1,233 +1,187 @@
 import streamlit as st
 from joblib import load
-import requests
 
 # Load pre-trained models
-with open('./ML Model/Extracted_Files/movies.joblib', 'rb') as file:
-    movies = load(file)
+movies = load('./ML Model/Extracted_Files/movies.joblib')
+similarity = load('./ML Model/Extracted_Files/similarity.joblib')
 
-with open('./ML Model/Extracted_Files/similarity.joblib', 'rb') as file:
-    similarity = load(file)
-
-# Ensure the year is in integer format
+# Ensure proper data types
 movies['year'] = movies['year'].astype(int)
-
-# Prepare movie list
-movie_list = movies['title'].values
-movie_list.sort()
+movies['genres'] = movies['genres'].apply(lambda x: x.split(", ") if isinstance(x, str) else x)
+movies['director'] = movies['director'].apply(lambda x: x.split(", ") if isinstance(x, str) else x)
 
 # Function to recommend movies based on similarity
 def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]
     distances = similarity[movie_index]
-    movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[:11]
-    
-    recommended_movies_list = []
-    for i in movies_list:
-        recommend_movie_dict = dict()
-        recommend_movie_dict['title'] = movies.iloc[i[0]].title
-        recommend_movie_dict['year'] = movies.iloc[i[0]].year
-        recommend_movie_dict['genres'] = movies.iloc[i[0]].genres
-        recommend_movie_dict['director'] = movies.iloc[i[0]].director
-        recommend_movie_dict['percentage'] = i[1] * 100
-        recommended_movies_list.append(recommend_movie_dict)
-    
-    return recommended_movies_list
+    recommended_indices = sorted(
+        list(enumerate(distances)), reverse=True, key=lambda x: x[1]
+    )[1:11]
 
-# Streamlit title and layout
+    recommendations = []
+    for idx, score in recommended_indices:
+        recommendations.append({
+            "title": movies.iloc[idx]['title'],
+            "year": movies.iloc[idx]['year'],
+            "genres": movies.iloc[idx]['genres'],
+            "director": movies.iloc[idx]['director'],
+            "percentage": score * 100,
+        })
+    return recommendations
+
+# Streamlit App
 st.set_page_config(page_title="MovieMentor", layout="wide")
 
-# Apply dark theme and custom colors
+# Custom CSS for professional styling with dark and light mode support
 st.markdown("""
     <style>
         body {
-            background-color: #1e1e1e;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
         }
-        .block-container {
-            padding: 30px;
-        }
-        .stButton>button {
+        .app-header {
+            text-align: center;
+            padding: 20px;
             background-color: #6200ea;
             color: white;
-            font-size: 16px;
-            border-radius: 8px;
-            padding: 10px 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        .stButton>button:hover {
-            background-color: #3700b3;
-        }
-        .stSelectbox>div>div>div>input {
-            background-color: #333;
-            color: white;
-            border-radius: 8px;
-            padding: 10px;
-        }
-        .stSelectbox>div>div>div>input:focus {
-            border-color: #6200ea;
-        }
-        .stHeader {
-            color: #6200ea;
-        }
-        hr {
-            border: 1px solid #6200ea;
-        }
-        .movie-card {
-            background-color: #333;
-            border-radius: 12px;
-            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
         }
-        .movie-card:hover {
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 15px;
         }
         .movie-title {
-            color: white;
-            font-size: 1.5em;
-            font-weight: 600;
+            font-size: 20px;
+            color: #333;
         }
         .movie-details {
-            color: white;
-            font-size: 1.1em;
+            font-size: 14px;
+            color: #666;
         }
-        .similarity {
-            font-weight: bold;
-            font-size: 1.2em;
+        .filters {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
         }
-        .high-similarity {
-            color: yellow;
+        .recommended-movies {
+            margin-top: 20px;
         }
-        .low-similarity {
-            color: red;
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: #fff;
+            }
+            .app-header {
+                background-color: #6200ea;
+                color: white;
+            }
+            .card {
+                background: #333;
+                border-color: #555;
+            }
+            .movie-title {
+                color: #f0f0f0;
+            }
+            .movie-details {
+                color: #ccc;
+            }
+            .filters {
+                background: #333;
+                border-color: #444;
+            }
+            .recommended-movies {
+                color: #fff;
+            }
+            .similarity-green {
+                color: #4caf50; /* Green for dark mode */
+            }
+            .similarity-red {
+                color: #f44336; /* Red for dark mode */
+            }
+        }
+        /* Light mode adjustments */
+        @media (prefers-color-scheme: light) {
+            .similarity-green {
+                color: #388e3c; /* Green for light mode */
+            }
+            .similarity-red {
+                color: #d32f2f; /* Red for light mode */
+            }
         }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<br>
-<div style="text-align: center; color: #ffffff; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1e1e1e; border-radius: 10px;">
-    <h2 style="font-size: 2em; color: #e2d12a;">MovieMentor</h2>
-    <h2 style="font-size: 2em; color: #6200ea;">🎬 Welcome to Your Movie Guide! 🎬</h2>
-    <p style="font-size: 1.1em;">
-        Select a movie and let our <strong style="color: #ff9800;">AI system</strong> recommend films you'll love.
-    </p>
-    <p style="font-size: 1.2em; color: #37d67a; font-weight: bold;">
-       🌟 Your next favorite movie awaits! 🌟
-    </p>
-</div>
-""", unsafe_allow_html=True)
+# App Header
+st.markdown("<div class='app-header'><h1>🎥 MovieMentor 🎥</h1><p style='text-align: centre;'>🍿 Explore Movies Like Never Before! 🍿</p></div>", unsafe_allow_html=True)
 
-
-# Filters
-st.sidebar.header("Filter Movies")
-selected_genre = st.sidebar.multiselect(
-    "Select Genres",
-    options=sorted(set([genre for genres in movies['genres'] for genre in genres]))  # Extract unique genres
-)
-
-selected_year = st.sidebar.slider(
-    "Select Release Year Range",
-    min_value=int(movies['year'].min()),
-    max_value=int(movies['year'].max()),
-    value=(int(movies['year'].min()), int(movies['year'].max())),
-)
-
-# Filter movies based on the selected genre and year
-filtered_movies = movies
-if selected_genre:
-    filtered_movies = filtered_movies[filtered_movies['genres'].apply(
-        lambda genres: any(genre in genres for genre in selected_genre))]
-
-filtered_movies = filtered_movies[filtered_movies['year'].between(selected_year[0], selected_year[1])]
-
-# Movie selection dropdown with smooth interaction
-selected_movie = st.selectbox(
-    label="Choose a Movie to Get Recommendations:",
-    options=filtered_movies['title'].values,
-    index=None,
-    help="Choose a movie from the list to get similar movie suggestions."
-)
+# Search Box for Movie Selection
+movie_lists = list(movies['title'].values)
+movie_lists = sorted(movie_lists)
+selected_movie = st.selectbox("🔎 Search for a Movie", [""] + movie_lists, index=0)
 
 # If a movie is selected
-if selected_movie:
-    # Get recommendations for the selected movie
-    recommended_movies = recommend(selected_movie)
+if selected_movie and selected_movie != "":
+    st.markdown("<hr>", unsafe_allow_html=True)
 
-    # If no filters are applied, show all recommendations
-    if not selected_genre and not selected_year:
-        st.markdown("<hr>", unsafe_allow_html=True)
-        st.subheader("🎬 Your Selected Movie 🎬")
-        st.markdown(f"**Title:** {recommended_movies[0]['title']}")
-        st.markdown(f"**Release Year:** {recommended_movies[0]['year']}")
-        st.markdown(f"**Genres:** {', '.join(recommended_movies[0]['genres'])}")
-        st.markdown(f"**Director:** {recommended_movies[0]['director'][0]}")
-        st.markdown(f"**Similarity:** {recommended_movies[0]['percentage']:.2f}%")
+    # Display Selected Movie
+    movie_details = movies[movies['title'] == selected_movie].iloc[0]
+    st.markdown(f"""
+    <div class='card'>
+        <h3 class='movie-title'>🎬 {movie_details['title']}</h3>
+        <p class='movie-details'><strong>📅 Release Year:</strong> {movie_details['year']}</p>
+        <p class='movie-details'><strong>🎞 Genres:</strong> {', '.join(movie_details['genres'])}</p>
+        <p class='movie-details'><strong>👨‍💼 Director:</strong> {', '.join(movie_details['director']) if movie_details['director'] else 'N/A'}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.markdown("<hr>", unsafe_allow_html=True)
-        st.subheader("🔍 Movie Recommendations 🔍")
+    # Get Recommendations
+    recommendations = recommend(selected_movie)
 
-        for i in range(1, len(recommended_movies)):
-            percentage = recommended_movies[i]['percentage']
+    # Sidebar Filters
+    st.sidebar.header("🎯 Filter Recommendations")
+    selected_genres = st.sidebar.multiselect(
+        "Select Genres",
+        sorted(set(genre for sublist in movies['genres'] for genre in sublist)),
+    )
+    selected_year_range = st.sidebar.slider(
+        "Year Range",
+        int(movies['year'].min()),
+        int(movies['year'].max()),
+        (1990, 2023),
+    )
 
-            card_class = 'high-similarity' if percentage >= 35 else 'low-similarity'
+    # Apply Filters to Recommendations
+    filtered_recommendations = recommendations
+    if selected_genres:
+        filtered_recommendations = [
+            rec for rec in filtered_recommendations if any(genre in rec['genres'] for genre in selected_genres)
+        ]
+    filtered_recommendations = [
+        rec for rec in filtered_recommendations if selected_year_range[0] <= rec['year'] <= selected_year_range[1]
+    ]
 
-            movie_card = f"""
-            <div class="movie-card">
-                <h4 class="movie-title">{recommended_movies[i]['title']} ({recommended_movies[i]['year']})</h4>
-                <p class="movie-details"><strong>Genres:</strong> {', '.join(recommended_movies[i]['genres'])}</p>
-                <p class="movie-details"><strong>Director:</strong> {recommended_movies[i]['director'][0]}</p>
-                <p class="similarity {card_class}">Similarity: {percentage:.2f}%</p>
+    # Display Recommendations
+    st.markdown("<div class='recommended-movies'><h2>🎦 Recommended Movies 🎦</h2></div>", unsafe_allow_html=True)
+
+    if filtered_recommendations:
+        for rec in filtered_recommendations:
+            # Conditional styling for similarity score
+            similarity_class = "similarity-green" if rec['percentage'] >= 35 else "similarity-red"
+            st.markdown(f"""
+            <div class='card'>
+                <h4 class='movie-title'>🎬{rec['title']} ({rec['year']})</h4>
+                <p class='movie-details'><strong>🎞 Genres:</strong> {', '.join(rec['genres'])}</p>
+                <p class='movie-details'><strong>👨‍💼 Director:</strong> {', '.join(rec['director']) if rec['director'] else 'N/A'}</p>
+                <p class='movie-details {similarity_class}' style="font-weight: bold;">Similarity Score: {rec['percentage']:.2f}%</p>
             </div>
-            """
-            st.markdown(movie_card, unsafe_allow_html=True)
-
-    # If filters are applied, show filtered recommendations
+            """, unsafe_allow_html=True)
     else:
-        filtered_recommended_movies = []
-        for movie in recommended_movies:
-            # Check if the movie meets the genre and year filter criteria
-            if (not selected_genre or any(genre in movie['genres'] for genre in selected_genre)) and \
-               (selected_year[0] <= movie['year'] <= selected_year[1]):
-                filtered_recommended_movies.append(movie)
-
-        st.markdown("<hr>", unsafe_allow_html=True)
-        st.subheader("🎬 Your Selected Movie 🎬")
-        st.markdown(f"**Title:** {recommended_movies[0]['title']}")
-        st.markdown(f"**Release Year:** {recommended_movies[0]['year']}")
-        st.markdown(f"**Genres:** {', '.join(recommended_movies[0]['genres'])}")
-        director = recommended_movies[0]['director'][0] if len(recommended_movies[0]['director']) != 0 else "Not Available"
-        st.markdown(f"**Director:** {director}")
-
-        st.markdown("<hr>", unsafe_allow_html=True)
-        st.markdown(
-            """
-            <style>
-            .responsive-subheader {
-                font-size: calc(1.5rem + 1vw);
-                text-align: center;
-            }
-            </style>
-            <h2 class="responsive-subheader">🔍 Movie Recommendations 🔍</h2>
-            """,
-            unsafe_allow_html=True
-        )
-
-        for i in range(1, len(filtered_recommended_movies)):
-            percentage = filtered_recommended_movies[i]['percentage']
-
-            card_class = 'high-similarity' if percentage >= 35 else 'low-similarity'
-
-            movie_card = f"""
-            <div class="movie-card">
-                <h4 class="movie-title" style="color:#5793CD;">{filtered_recommended_movies[i]['title']} ({filtered_recommended_movies[i]['year']})</h4>
-                <p class="movie-details"><strong>Genres:</strong> {', '.join(filtered_recommended_movies[i]['genres'])}</p>
-                <p class="movie-details"><strong>Director:</strong> {recommended_movies[i]['director'][0] if len(recommended_movies[i]['director']) != 0 else "Not Available"}</p>
-                <p class="similarity {card_class}">Similarity: {percentage:.2f}%</p>
-            </div>
-            """
-            st.markdown(movie_card, unsafe_allow_html=True)
+        st.markdown("<p style='color: red;'>No recommendations match the selected filters.</p>", unsafe_allow_html=True)
+else:
+    st.markdown("<p style='color: gray;'>Please select a movie to see recommendations.</p>", unsafe_allow_html=True)
