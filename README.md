@@ -1,4 +1,5 @@
-# 🎥 MovieMentor 🎥
+
+# ![alt text](image.png)
 
 **MovieMentor** is a cutting-edge Hollywood Movie Recommendation System that helps you find movies you’ll love. Powered by **Content-Based Filtering**, **Natural Language Processing (NLP)**, and **Cosine Similarity**, MovieMentor analyzes your preferences to provide highly personalized recommendations. The sleek and interactive web application is built using **Streamlit** for a seamless user experience.
 
@@ -87,12 +88,6 @@ Ensure you have Python 3.7 or later installed on your system.
 ## Contribution 📚
 
 We welcome contributions to make MovieMentor even better! Feel free to fork the repository and submit a pull request with your ideas or improvements. 👨‍💻
-
----
-
-## License 🌐
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details. 🔒
 
 ---
 
